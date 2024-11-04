@@ -1,0 +1,151 @@
+<div class="fixed inset-0 bg-black/30 z-50">
+  <div class="fixed right-0 top-0 h-full w-full sm:w-[600px] bg-white shadow-xl transition-transform transform duration-300 ease-in-out" @slideInOut>
+    <!-- Header -->
+    <div class="flex items-center justify-between p-4 border-b bg-[#001B5D] text-white shadow-md">
+      <button (click)="close()" class="p-2 hover:bg-blue-900 transition-colors duration-200 rounded-full">
+        <fa-icon
+          [icon]="faArrowLeft"
+          class="text-white"
+          [size]="'lg'"
+        ></fa-icon>
+      </button>
+      <h2 class="text-lg font-semibold">Historique des transactions</h2>
+      <button (click)="close()" class="p-2 hover:bg-blue-500 transition-colors duration-200 rounded-full">
+        <fa-icon [icon]="['fas', 'times']" class="text-white"></fa-icon>
+      </button>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="p-4 space-y-4 bg-gray-50 border-b">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Date début -->
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-gray-700">Date début</label>
+          <input
+            type="date"
+            [(ngModel)]="filters.dateDebut"
+            (ngModelChange)="applyFilters()"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-shadow duration-200 shadow-sm hover:shadow-md"
+          >
+        </div>
+        <!-- Date fin -->
+        <div class="space-y-1">
+          <label class="text-sm font-medium text-gray-700">Date fin</label>
+          <input
+            type="date"
+            [(ngModel)]="filters.dateFin"
+            (ngModelChange)="applyFilters()"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-shadow duration-200 shadow-sm hover:shadow-md"
+          >
+        </div>
+      </div>
+
+      <!-- Telephone search -->
+      <div class="space-y-1">
+        <label class="text-sm font-medium text-gray-700">Téléphone</label>
+        <input
+          type="text"
+          [(ngModel)]="filters.telephone"
+          (ngModelChange)="applyFilters()"
+          placeholder="Rechercher par numéro..."
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-shadow duration-200 shadow-sm hover:shadow-md"
+        >
+      </div>
+
+      <!-- Status filter -->
+      <div class="space-y-1">
+        <label class="text-sm font-medium text-gray-700">Statut</label>
+        <select
+          [(ngModel)]="filters.status"
+          (ngModelChange)="applyFilters()"
+          class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 transition-shadow duration-200 shadow-sm hover:shadow-md"
+        >
+          <option value="">Tous les statuts</option>
+          <option value="COMPLETE">Complété</option>
+          <option value="ENATTENTE">En attente</option>
+          <option value="ECHEC">Échec</option>
+        </select>
+      </div>
+
+      <!-- Reset button -->
+      <button
+        (click)="resetFilters()"
+        class="w-full px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors duration-200 shadow-sm hover:shadow-md"
+      >
+        Réinitialiser les filtres
+      </button>
+    </div>
+
+    <!-- Transactions List -->
+    <div class="h-[calc(100vh-300px)] overflow-y-auto">
+      <!-- Loading state -->
+      <div *ngIf="isLoading" class="flex items-center justify-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+
+      <!-- Error state -->
+      <div *ngIf="error" class="p-4 bg-red-50 text-red-700">
+        {{ error }}
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!isLoading && !error && transactions.length === 0" class="p-8 text-center text-gray-500">
+        Aucune transaction trouvée
+      </div>
+
+      <!-- Transactions -->
+      <div *ngIf="!isLoading && !error && transactions.length > 0" class="divide-y">
+        <div
+          *ngFor="let transaction of transactions"
+          (click)="openTransactionDetail(transaction)"
+          class="p-4 bg-white hover:bg-blue-50 cursor-pointer transition-colors duration-200 shadow-sm hover:shadow-md"
+        >
+          <div class="flex items-center justify-between">
+            <!-- Left side: Icon and type -->
+            <div class="flex items-center space-x-3">
+              <div [class]="getTransactionColorClass(transaction.type, transaction) + ' p-2 rounded-full'">
+                <fa-icon
+                  [icon]="getTransactionIcon(transaction.type, transaction)"
+                  class="text-white"
+                  [size]="'lg'"
+                ></fa-icon>
+              </div>
+              <div>
+                <p class="font-medium">
+                  {{transaction.type}}
+                  {{ transaction?.emeteur?.prenom }} {{ transaction.compte.nom }}
+                </p>
+                <p class="text-sm text-gray-500">
+                  {{ user.telephone != transaction.compte.telephone ? transaction?.compte?.telephone : transaction?.emeteur?.telephone }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Right side: Amount and status -->
+            <div class="text-right">
+              <p [class]="getAmountColorClass(transaction.type, transaction)">
+                {{ formatAmount(transaction.montant, transaction.type, transaction) }}
+              </p>
+              <div class="flex items-center justify-end space-x-1.5">
+                <div
+                  [class]="getStatusDotClass(transaction.statut) + ' w-2 h-2 rounded-full'"
+                ></div>
+                <span class="text-sm text-gray-500">
+                  {{ formatDate(transaction.createdAt) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transaction Detail Modal -->
+  <app-transaction-detail
+    *ngIf="selectedTransaction"
+    [transaction]="selectedTransaction"
+    [user]="user"
+    (closeDetail)="closeTransactionDetail()"
+  ></app-transaction-detail>
+</div>

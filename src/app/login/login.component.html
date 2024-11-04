@@ -1,0 +1,113 @@
+<div class="min-h-screen bg-[#001B5D] flex items-center justify-center p-4">
+  <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <!-- Logo Section -->
+    <div class="text-center py-8 bg-gray-400">
+      <div class="w-48 h-12 mx-auto mb-2">
+        <img src="images/logo.png" alt="Wave Logo" class="w-full h-full -mb-4 object-contain" />
+        <svg viewBox="0 0 200 60">
+          <defs>
+            <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#001B5D"/>
+              <stop offset="100%" style="stop-color:#0047B3"/>
+            </linearGradient>
+          </defs>
+          <path d="M30 40c10-20 20-20 30 0c10 20 20 20 30 0" stroke="url(#wave-gradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <text x="100" y="45" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="#001B5D">WAVE</text>
+        </svg>
+
+      <p class=" text-sm text-blue-950">Votre argent, simplifié</p>
+      </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="p-8">
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-8">
+        <!-- Phone Input -->
+        <div class="space-y-2">
+          <label class="text-sm font-medium text-[#001B5D] block">Numéro de téléphone</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">+221</span>
+            <input
+              type="tel"
+              formControlName="phone"
+              class="w-full pl-16 pr-4 py-3 border border-blue-100 rounded-lg
+                     focus:ring-2 focus:ring-[#001B5D] focus:border-[#001B5D]
+                     bg-white hover:bg-blue-50 transition-all duration-200"
+              placeholder="77 XXX XX XX"
+            >
+          </div>
+          <div *ngIf="loginForm.get('phone')?.touched && loginForm.get('phone')?.invalid"
+               class="text-red-500 text-sm">
+            Numéro de téléphone invalide
+          </div>
+        </div>
+
+        <!-- PIN Input Section -->
+        <div class="space-y-4">
+          <div class="flex justify-between items-center">
+            <label class="text-sm font-medium text-[#001B5D]">Code PIN (6 chiffres)</label>
+            <button type="button"
+                    (click)="togglePinVisibility()"
+                    class="text-sm text-[#001B5D] hover:text-blue-700 transition-colors">
+              {{ showPin ? 'Masquer' : 'Afficher' }} le code
+            </button>
+          </div>
+
+          <!-- PIN Boxes Container -->
+          <div class="flex justify-between gap-2 mb-6">
+            <ng-container *ngFor="let i of [0,1,2,3,4,5]">
+              <div class="w-14 h-14">
+                <input
+                  #pinInput
+                  [formControlName]="'pin' + i"
+                  [type]="showPin ? 'text' : 'password'"
+                  maxlength="1"
+                  class="w-full h-full text-center text-2xl font-bold
+                         bg-blue-50 border-2 border-blue-100 rounded-xl
+                         focus:border-[#001B5D] focus:ring-2 focus:ring-[#001B5D]/20
+                         hover:bg-blue-100/50
+                         focus:bg-white transition-all duration-200 outline-none"
+                  (input)="onPinInput($event, i)"
+                  (keydown)="onKeyDown($event, i)"
+                  (focus)="onPinFocus($event)"
+                  (paste)="handlePaste($event)"
+                >
+              </div>
+            </ng-container>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="hasPinError()" class="text-center text-red-500 text-sm">
+            Veuillez entrer un code PIN valide à 6 chiffres
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit"
+                [disabled]="!loginForm.valid || isLoading"
+                class="w-full py-4 px-4 bg-[#001B5D] text-white text-lg font-medium
+                       rounded-xl hover:bg-blue-900 focus:ring-4 focus:ring-[#001B5D]/30
+                       transition-all duration-300 shadow-lg hover:shadow-xl
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       flex items-center justify-center space-x-2">
+          @if (isLoading) {
+            <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Connexion en cours...</span>
+          } @else {
+            <span>Se connecter</span>
+          }
+        </button>
+
+        <!-- Help Link -->
+        <div class="text-center mt-4">
+          <a href="#" class="text-sm text-[#001B5D] hover:text-blue-700 transition-colors">
+            Besoin d'aide pour vous connecter ?
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

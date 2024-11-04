@@ -1,0 +1,86 @@
+<div class="fixed inset-0 bg-blue-850 bg-opacity-50 z-40" (click)="closeEnvoyeComponent()">
+  <div class="absolute inset-y-0 right-0 w-full max-w-2xl bg-white shadow-xl z-50" (click)="$event.stopPropagation()">
+    <!-- Header -->
+    <div class="sticky top-0 bg-blue-950 text-white border-b border-blue-200 px-6 py-4 flex items-center">
+      <button (click)="closeEnvoyeComponent()" class="mr-4 p-2 rounded-full hover:bg-red-50 transition-colors duration-200">
+        <i class="fas fa-times text-red-600"></i>
+      </button>
+      <div class="w-28 h-6 relative mb-2">
+        <img src="images/logo.png" alt="Wave Logo" class="object-contain -mb-2 w-full h-full" />
+        <svg viewBox="0 0 200 60">
+          <defs>
+            <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:white"/>
+              <stop offset="100%" style="stop-color:#0047B3"/>
+            </linearGradient>
+          </defs>
+          <path d="M30 40c10-20 20-20 30 0c10 20 20 20 30 0" stroke="url(#wave-gradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <text x="100" y="45" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="white">WAVE</text>
+        </svg>
+      </div>
+      <h2 class="text-xl font-semibold text-white"> Envoyé de l'Argent</h2>
+    </div>
+
+    <!-- Search and Add New -->
+    <div class="px-6 py-4 border-b border-blue-200">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        placeholder="Rechercher..."
+        class="w-full px-4 py-2 rounded-md bg-blue-50 text-blue-950 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      />
+      <div class="mt-4">
+        <button type="button" class="bg-[#001B5D] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+          <i class="fas fa-plus mr-2"></i>Ajouter à un nouveau numéro
+        </button>
+      </div>
+    </div>
+
+    <!-- Contacts List -->
+    <div class="px-6 py-4">
+      <h3 class="text-lg font-semibold text-[#001B5D] mb-2">Contacts</h3>
+
+      @if (isLoading) {
+        <div class="flex justify-center items-center p-8">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#001B5D]"></div>
+        </div>
+      }
+
+      @if (errorMessage) {
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+          <strong class="font-bold">Erreur :</strong>
+          <span class="block sm:inline">{{ errorMessage }}</span>
+        </div>
+      }
+
+      @if (!isLoading && !errorMessage && contacts.length > 0) {
+        <ul>
+          @for (contact of contacts; track contact.id) {
+            <li
+              (click)="selectContact(contact)"
+              class="py-2 border-b border-blue-200 cursor-pointer hover:bg-gray-50"
+            >
+              <div>
+                <h4 class="font-medium text-[#001B5D]">
+                  {{ contact.Client[0].nom }} {{ contact.Client[0].prenom }}
+                </h4>
+                <p class="text-gray-500">{{ contact.telephone }}</p>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  </div>
+</div>
+
+@if (selectedContact) {
+  <app-sendto
+    [contact]="selectedContact"
+    [monsolde]="monsolde"
+    [monId]="monId"
+    (closeComponent)="closeSendtoComponent()"
+  ></app-sendto>
+
+  <app-notification-toast></app-notification-toast>
+}

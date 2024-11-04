@@ -1,0 +1,140 @@
+<div class="bg-gradient-to-b from-blue-50 to-blue-100 pb-24 lg:pb-0">
+  <!-- En-tête avec le style Wave -->
+  <header class="bg-[#001B5D] h-[280px] sticky top-0 text-white p-3 md:p-4 rounded-b-lg shadow-lg z-20">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex items-center justify-between mb-3">
+        <!-- Logo Wave -->
+        <div class="flex items-center gap-2">
+          <div class="w-24 h-8 relative">
+            <img src="images/logo.png" alt="Wave Logo" class="w-full h-full -mb-2 object-contain" />
+            <svg viewBox="0 0 200 60">
+              <defs>
+                <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#f1f1f1"/>
+                  <stop offset="100%" style="stop-color:#0047B3"/>
+                </linearGradient>
+              </defs>
+              <path d="M30 40c10-20 20-20 30 0c10 20 20 20 30 0" stroke="url(#wave-gradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+              <text x="100" y="45" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="white">WAVE</text>
+            </svg>
+          </div>
+        </div>
+
+        <!-- Profile et Notifications -->
+        <div class="flex items-center gap-3">
+          <button
+            class="relative p-1.5 rounded-full hover:bg-white/20 transition-all duration-300"
+            (click)="notificationList.toggleVisibility()"
+          >
+            <div class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-red-500 rounded-full text-xs flex items-center justify-center">
+              {{ unreadCount() }}
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+          </button>
+
+          <app-notification-list #notificationList></app-notification-list>
+
+          <div class="flex items-center gap-2 cursor-pointer" (click)="toggleProfile()">
+            <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+              <span class="text-base font-bold">{{ getUserInitials() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Menu Actions -->
+      <div class="grid grid-cols-4 gap-2 mt-4 pb-3">
+        <ng-container *ngFor="let action of actions; trackBy: trackByName">
+          <button
+            class="flex flex-col items-center gap-1.5 p-1.5 rounded-lg hover:bg-white/10 transition-all duration-300"
+            (click)="handleActionClick(action)">
+
+            <div class="w-10 h-10 rounded-full flex items-center justify-center bg-white/20">
+              <!-- Si l'action est Orange Money, affiche le SVG, sinon l'emoji -->
+              <ng-container *ngIf="action.name === 'Orange Money'; else textIcon">
+                <app-orange-money-icon></app-orange-money-icon> <!-- Composant SVG personnalisé -->
+              </ng-container>
+
+              <ng-template #textIcon>
+                <span class="text-lg">{{ action.icon }}</span>
+              </ng-template>
+            </div>
+
+            <span class="text-[10px] text-center font-medium">{{ action.name }}</span>
+          </button>
+        </ng-container>
+      </div>
+
+
+      <!-- Solde Component -->
+      <app-balance
+        class="w-full md:max-w-lg lg:max-w-2xl mx-auto mb-4"
+        [code]="qrCode"
+        [solde]="solde">
+      </app-balance>
+
+      <!-- Composant de Profil -->
+      <app-profile
+        [isOpen]="isProfileOpen"
+        [userName]="userName"
+        [userId]="userId"
+        [profileOptions]="profileOptions"
+        (closeProfile)="onCloseProfile()"
+        (optionSelected)="onProfileOptionSelected($event)">
+      </app-profile>
+
+      <!-- Composant Envoyé -->
+      <app-envoye *ngIf="showEnvoyeComponent" (closeComponent)="onshowEnvoyeComponentClose()"></app-envoye>
+      <app-envoye-om *ngIf="showEnvoyeOMComponent" (closeComponent)="onshowEnvoyeOMComponentClose()"></app-envoye-om>
+
+      <app-envoyeprog *ngIf="showScheduledSend" (closeComponent)="onshowScheduledSendClose()"></app-envoyeprog>
+      <app-recurring-transfer-list *ngIf="showRecurringTransfet" (close)="onRecurringTransfetClose()"></app-recurring-transfer-list>
+
+    </div>
+  </header>
+
+  <!-- Contenu Principal -->
+  <div class="px-3 md:px-4 py-3 max-w-7xl mx-auto mt-4">
+    <!-- Transactions -->
+    <div class="bg-white rounded-xl shadow p-3 mt-3">
+      <h2 class="text-base font-semibold text-[#001B5D] mb-3">Transactions récentes</h2>
+      <app-transactions></app-transactions>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation latérale desktop -->
+<nav class="hidden lg:block fixed left-0 top-0 bottom-0 w-60 bg-white border-r border-blue-100 p-4">
+  <div class="flex flex-col h-full">
+    <div class="mb-6">
+      <div class="w-32 h-10 relative">
+        <img src="images/logo.png" alt="Wave Logo" class="object-contain -mb-2 w-full h-full" />
+        <svg viewBox="0 0 200 60">
+          <defs>
+            <linearGradient id="wave-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#001B5D"/>
+              <stop offset="100%" style="stop-color:#0047B3"/>
+            </linearGradient>
+          </defs>
+          <path d="M30 40c10-20 20-20 30 0c10 20 20 20 30 0" stroke="url(#wave-gradient)" stroke-width="8" fill="none" stroke-linecap="round"/>
+          <text x="100" y="45" font-family="Arial" font-size="24" font-weight="bold" text-anchor="middle" fill="#001B5D">WAVE</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Profil en bas -->
+    <div class="mt-auto pt-3 border-t border-blue-100">
+      <div class="flex items-center gap-3 p-2">
+        <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+          <span class="text-base font-bold text-[#001B5D]">{{ getUserInitials() }}</span>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-[#001B5D]">{{ userName }}</p>
+          <p class="text-xs text-blue-600">ID: {{ userId }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>

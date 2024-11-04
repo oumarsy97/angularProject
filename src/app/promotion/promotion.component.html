@@ -1,0 +1,12 @@
+<div class="promotions-section mt-6">
+  <h2 class="text-2xl font-semibold text-white mb-4">Promotions en cours</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div *ngFor="let promo of promotions" class="bg-white bg-opacity-10 p-6 rounded-2xl flex items-center space-x-4 hover:shadow-lg transition-all">
+      <img ngSrc="promo.image" alt="{{ promo.title }}" class="w-20 h-20 object-cover rounded-lg" fill>
+      <div>
+        <h3 class="text-xl font-semibold">{{ promo.title }}</h3>
+        <p class="text-gray-200 text-sm">{{ promo.description }}</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,118 @@
+<!-- sendto.component.html -->
+<div class="fixed inset-0 bg-blue-950/50 backdrop-blur-sm z-50 transition-opacity duration-300"
+     (click)="closseComponent()"
+     [@fadeAnimation]>
+
+  <div class="absolute inset-y-0 right-0 w-full max-w-2xl bg-white shadow-2xl z-60 overflow-y-auto"
+       (click)="$event.stopPropagation()"
+       [@slideAnimation]>
+
+    <!-- Header -->
+    <div class="sticky top-0 bg-gradient-to-r from-blue-950 to-blue-800 text-white px-6 py-4 flex items-center justify-between shadow-lg">
+      <h2 class="text-2xl font-semibold">Détails du transfert</h2>
+      <button (click)="closseComponent()"
+              class="rounded-full p-2 hover:bg-white/10 transition-all duration-200 group">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white group-hover:rotate-90 transition-transform duration-200"
+             fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6 space-y-6">
+      <!-- Informations du destinataire -->
+      <div class="bg-blue-50 p-4 rounded-lg space-y-4 hover:shadow-md transition-shadow duration-200">
+        <div class="space-y-2">
+          <h3 class="text-gray-900 font-medium text-sm uppercase tracking-wide">Destinataire</h3>
+          <p class="text-xl font-medium text-gray-900">{{ contact.Client[0].nom }} {{ contact.Client[0].prenom }}</p>
+          <p class="text-gray-700">{{ contact.telephone }}</p>
+        </div>
+      </div>
+
+      <!-- Montants -->
+      <div class="space-y-4">
+        <!-- Montant à recevoir -->
+        <div class="space-y-2">
+          <h3 class="text-gray-900 font-medium text-sm uppercase tracking-wide">Montant à recevoir</h3>
+          <div class="relative">
+            <input type="number"
+                   [(ngModel)]="montantRecu"
+                   (ngModelChange)="calculateMontantTotal()"
+                   class="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200
+                          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                          transition-all duration-200 text-gray-900"
+                   [class.border-red-500]="montant > monsolde"
+                   placeholder="0">
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-700">FCFA</span>
+          </div>
+        </div>
+
+        <!-- Frais -->
+        <div class="space-y-2">
+          <h3 class="text-gray-900 font-medium text-sm uppercase tracking-wide">Frais de transfert</h3>
+          <div class="relative">
+            <input type="number"
+                   [ngModel]="frais"
+                   readonly
+                   class="w-full px-4 py-3 rounded-lg bg-gray-100 border border-gray-200 text-gray-900"
+                   placeholder="0">
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-700">FCFA</span>
+          </div>
+          <p class="text-sm text-gray-600">
+            5 FCFA (0-500 FCFA) | 1% (au-delà de 500 FCFA) | Maximum 5000 FCFA
+          </p>
+        </div>
+
+        <!-- Montant total -->
+        <div class="space-y-2">
+          <h3 class="text-gray-900 font-medium text-sm uppercase tracking-wide">Montant total à envoyer</h3>
+          <div class="relative">
+            <input type="number"
+                   [ngModel]="montant"
+                   readonly
+                   class="w-full px-4 py-3 rounded-lg bg-gray-100 border border-gray-200
+                          text-gray-900 font-semibold"
+                   placeholder="0">
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-700">FCFA</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Message d'erreur -->
+      <div *ngIf="errorMessage"
+           class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg"
+           [@fadeAnimation]>
+        <div class="flex items-center">
+          <svg class="h-5 w-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <p class="text-red-800">{{ errorMessage }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer avec bouton d'envoi -->
+    <div class="sticky bottom-0 bg-white px-6 py-4 border-t border-gray-200 mt-4">
+      <button (click)="envoyerArgent()"
+              [disabled]="!isFormValid()"
+              class="w-full bg-gradient-to-r from-blue-950 to-blue-800 text-white font-medium
+                     py-3 px-6 rounded-lg shadow-lg hover:shadow-xl
+                     disabled:opacity-50 disabled:cursor-not-allowed
+                     transform hover:-translate-y-0.5 active:translate-y-0
+                     transition-all duration-200">
+        <span class="flex items-center justify-center">
+          <svg *ngIf="!loading" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          </svg>
+          <svg *ngIf="loading" class="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Envoyer
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
